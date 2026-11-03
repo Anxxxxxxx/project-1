@@ -37,7 +37,9 @@
     .wrap { max-width: 680px; margin: 0 auto; }
 
     /* ---------- Fireworks canvas ---------- */
-    #fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 60; }
+    #fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+    /* fireworks sit behind the ticket / card, inside whichever pop-up is open */
+    .overlay > :not(canvas) { position: relative; z-index: 1; }
 
     /* ---------- Ticket ---------- */
     .ticket {
@@ -131,6 +133,33 @@
       .pop, .overlay .greeting, .overlay .cta { animation: none; opacity: 1; }
       .ticket .glint { display: none; }
     }
+
+    /* ---------- Thank-you card ---------- */
+    .thank-card {
+      width: 100%; max-width: 420px; padding: 10px; border-radius: 20px; color: var(--ink);
+      background: linear-gradient(135deg, #ffd56b, var(--gold) 45%, var(--orange));
+      box-shadow: 0 25px 60px rgba(0,0,0,.55);
+    }
+    .tc-border {
+      background:
+        radial-gradient(circle at 0 0, rgba(247,183,51,.25) 0 40px, transparent 41px),
+        radial-gradient(circle at 100% 100%, rgba(252,74,26,.18) 0 50px, transparent 51px),
+        #fff8ea;
+      border: 2px dashed rgba(42,21,70,.3); border-radius: 14px;
+      padding: 26px 22px 22px; text-align: center;
+    }
+    .tc-diyas { font-size: 1.5rem; letter-spacing: .3rem; }
+    .tc-check {
+      width: 56px; height: 56px; margin: 12px auto 6px; border-radius: 50%;
+      display: grid; place-items: center; font-size: 1.8rem; font-weight: 700; color: #fff;
+      background: #2fa84f; box-shadow: 0 0 0 6px rgba(47,168,79,.18);
+    }
+    .tc-received { margin: 6px 0 0; font-size: .8rem; letter-spacing: .2em; text-transform: uppercase; font-weight: 600; color: #2fa84f; }
+    .thank-card h2 { font-family: "Playfair Display", serif; font-weight: 800; font-size: 2rem; margin: 6px 0 8px; color: var(--ink); }
+    .thank-card p { margin: 0 0 12px; line-height: 1.5; }
+    .tc-time { font-size: .8rem; opacity: .65; }
+    .tc-sign { font-family: "Playfair Display", serif; font-style: italic; }
+    .thank-card button { margin-top: 6px; color: #fff; background: linear-gradient(90deg, #5a2d91, var(--ink)); }
 
     /* ---------- Page header ---------- */
     header { text-align: center; margin-bottom: 24px; }
@@ -256,6 +285,22 @@
     </div>
   </div>
 
+  <!-- ===== Thank-you card: pops up once the RSVP has been received ===== -->
+  <div class="overlay hidden" id="thankCard" role="dialog" aria-modal="true" aria-labelledby="tcName" aria-live="assertive">
+    <div class="thank-card pop">
+      <div class="tc-border">
+        <div class="tc-diyas" aria-hidden="true">🪔 🪔 🪔</div>
+        <div class="tc-check" aria-hidden="true">✓</div>
+        <p class="tc-received">RSVP received!</p>
+        <h2 id="tcName">Thank you!</h2>
+        <p id="tcMsg"></p>
+        <p class="tc-time" id="tcTime"></p>
+        <p class="tc-sign">With love &amp; light,<br><b>Anvita</b> ✨</p>
+        <button type="button" id="tcClose">See my entry pass 🎟️</button>
+      </div>
+    </div>
+  </div>
+
   <div class="wrap">
     <header>
       <div class="diyas" aria-hidden="true">🪔✨🪔</div>
@@ -305,15 +350,9 @@
       <div id="attendingSection" class="hidden">
         <fieldset>
           <legend>Guests</legend>
-          <div class="row">
-            <div class="field">
-              <label for="adults">Adults (incl. you)</label>
-              <input type="number" id="adults" name="adults" min="1" max="10" value="1">
-            </div>
-            <div class="field">
-              <label for="kids">Kids</label>
-              <input type="number" id="kids" name="kids" min="0" max="10" value="0">
-            </div>
+          <div class="field">
+            <label for="guests">Number of guests (including you)</label>
+            <input type="number" id="guests" name="guests" min="1" max="10" value="1">
           </div>
           <div class="field">
             <label for="guestNames">Names of people coming with you</label>
@@ -490,7 +529,8 @@
     /*
      * WHERE RSVPs GO  (see SETUP.md)
      * -------------------------------
-     * SHEET_URL  – Google Apps Script web-app URL (from google-sheet/Code.gs).
+     * SHEET_URL  – Web-app URL of google-sheet/Code.gs, deployed from the RSVP sheet
+     *              docs.google.com/spreadsheets/d/1G5hdZNG5Yye6JGH5cOXwhZnxP-gkgCg6nYNS9ceGR1U
      *              Every RSVP becomes a row in a Google Sheet (download as
      *              Excel any time) and the host also gets an email.
      * HOST_EMAIL – Used when SHEET_URL is empty: each RSVP is emailed to the
@@ -558,6 +598,7 @@
       document.body.classList.add("locked");
       restartPop(invite.querySelector(".ticket"));
       setTimeout(() => fx.play(3500), 600);
+      invite.prepend($("fx"));
       $("rsvpNowBtn").focus({ preventScroll: true });
     }
     function closeInvite() {
@@ -598,7 +639,7 @@
         data[k] = data[k] ? `${data[k]}, ${v}` : v;
       }
       if (data.attending === "No") {
-        ["adults","kids","guestNames","category","dish","servings","dishAlso","allergens",
+        ["guests","guestNames","category","dish","servings","dishAlso","allergens",
          "needs","vegConfirm","games","bringGame","dietary","help","song"].forEach(k => delete data[k]);
       }
       return data;
@@ -626,7 +667,7 @@
 
     const LABELS = {
       name: "Name", email: "Email", phone: "Phone", attending: "Attending",
-      adults: "Adults", kids: "Kids", guestNames: "Coming with", category: "Bringing",
+      guests: "Guests", guestNames: "Coming with", category: "Bringing",
       dish: "Dish", servings: "Servings", dishAlso: "Dish is also", allergens: "Contains",
       needs: "Needs", vegConfirm: "Vegetarian", games: "Excited for", bringGame: "Bringing along",
       dietary: "Dietary notes", help: "Helping with", song: "Song request", message: "Message"
@@ -645,8 +686,7 @@
     function showThanks(data) {
       const first = data.name.trim().split(/\s+/)[0];
       const going = data.attending !== "No";
-      const adults = Number(data.adults || 1), kids = Number(data.kids || 0);
-      const total = adults + kids;
+      const total = Math.max(1, Number(data.guests) || 1);
 
       $("thanksTitle").textContent = going ? `See you soon, ${first}! 🎉` : `We'll miss you, ${first}!`;
       $("thanksText").textContent = going
@@ -659,14 +699,12 @@
       if (going) {
         $("passName").textContent = data.name.trim();
         $("passParty").textContent = total > 1
-          ? `+ ${total - 1} guest${total > 2 ? "s" : ""} (${adults} adult${adults > 1 ? "s" : ""}${kids ? `, ${kids} kid${kids > 1 ? "s" : ""}` : ""})`
+          ? `+ ${total - 1} guest${total > 2 ? "s" : ""}`
           : "Party of one, ready to play!";
         $("passDish").textContent = data.dish?.trim() || data.category || "—";
         $("passStatus").textContent = data.attending === "Yes" ? "✅ Confirmed" : "🤔 Tentative";
         $("passAdmit").innerHTML = `ADMIT<br>${total}`;
         $("passSerial").textContent = serialFor(data.name);
-        restartPop(pass);
-        setTimeout(() => fx.play(4000), 500);
       }
 
       $("summary").innerHTML = Object.entries(data)
@@ -675,8 +713,38 @@
         .join("");
       form.classList.add("hidden");
       thanks.classList.remove("hidden");
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0 });
+      openThankCard(data, first, going);
     }
+
+    /* ---------- Thank-you card pop-up (confirms the RSVP was received) ---------- */
+    function openThankCard(data, first, going) {
+      const card = $("thankCard");
+      $("tcName").textContent = `Thank you, ${first}!`;
+      $("tcMsg").textContent =
+        data.attending === "Yes" ? "We can't wait to celebrate the festival of lights with you. Get ready for cards, games & delicious food! 🎲🍛"
+        : data.attending === "Maybe" ? "We've noted you as a maybe. Hope you can make it! You can update your RSVP any time. 🤞"
+        : "We'll miss you this time! Wishing you and your family a very Happy Diwali. 🪔";
+      $("tcTime").textContent = "Received " + new Date().toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
+      $("tcClose").textContent = going ? "See my entry pass 🎟️" : "Close";
+      card.classList.remove("hidden", "closing");
+      card.prepend($("fx"));
+      document.body.classList.add("locked");
+      restartPop(card.querySelector(".thank-card"));
+      setTimeout(() => fx.play(4000), 400);
+      $("tcClose").focus({ preventScroll: true });
+    }
+    function closeThankCard() {
+      const card = $("thankCard");
+      card.classList.add("closing");
+      setTimeout(() => {
+        card.classList.add("hidden");
+        document.body.classList.remove("locked");
+        if (!$("pass").classList.contains("hidden")) restartPop($("pass"));
+      }, 450);
+    }
+    $("tcClose").addEventListener("click", closeThankCard);
+    addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("thankCard").classList.contains("hidden")) closeThankCard(); });
 
     /* ---------- Sending ---------- */
     // Google Sheet (Apps Script). A form-encoded body keeps it a "simple" request (no CORS preflight).

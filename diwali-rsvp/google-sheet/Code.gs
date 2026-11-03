@@ -1,7 +1,7 @@
 /**
  * Diwali Potluck RSVP → Google Sheet (+ email to host)
  *
- * Paste this into Extensions ▸ Apps Script of a new Google Sheet,
+ * Paste this into Extensions ▸ Apps Script of the RSVP Google Sheet,
  * then Deploy ▸ New deployment ▸ Web app (Execute as: Me, Who has access: Anyone).
  * Full steps: ../SETUP.md
  *
@@ -9,6 +9,9 @@
  */
 
 const HOST_EMAIL = 'anvita8126@gmail.com';
+// The host's RSVP spreadsheet:
+// https://docs.google.com/spreadsheets/d/1G5hdZNG5Yye6JGH5cOXwhZnxP-gkgCg6nYNS9ceGR1U/edit
+const SPREADSHEET_ID = '1G5hdZNG5Yye6JGH5cOXwhZnxP-gkgCg6nYNS9ceGR1U';
 const SHEET_NAME = 'RSVPs';
 
 // [form field, column heading] — order here = column order in the sheet
@@ -18,8 +21,7 @@ const COLUMNS = [
   ['email', 'Email'],
   ['phone', 'Phone'],
   ['attending', 'Attending'],
-  ['adults', 'Adults'],
-  ['kids', 'Kids'],
+  ['guests', 'Guests (incl. them)'],
   ['guestNames', 'Coming with'],
   ['category', 'Dish type'],
   ['dish', 'Dish name'],
@@ -62,7 +64,7 @@ function doGet() {
 }
 
 function getSheet_() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   let sheet = ss.getSheetByName(SHEET_NAME);
   if (!sheet) {
     sheet = ss.insertSheet(SHEET_NAME);
@@ -84,7 +86,7 @@ function notifyHost_(p, sheet) {
     : [];
   let yes = 0, maybe = 0;
   rows.forEach((r) => {
-    const n = (Number(r[idx('adults')]) || 1) + (Number(r[idx('kids')]) || 0);
+    const n = Number(r[idx('guests')]) || 1;
     if (r[idx('attending')] === 'Yes') yes += n;
     if (r[idx('attending')] === 'Maybe') maybe += n;
   });
@@ -104,7 +106,7 @@ function notifyHost_(p, sheet) {
       `<h2>New RSVP from ${esc(p.name)}</h2>` +
       `<table border="1" cellspacing="0" style="border-collapse:collapse">${table}</table>` +
       `<p><b>Headcount so far:</b> ${yes} coming, ${maybe} maybe.</p>` +
-      `<p><a href="${SpreadsheetApp.getActiveSpreadsheet().getUrl()}">Open the RSVP sheet</a></p>`,
+      `<p><a href="${SpreadsheetApp.openById(SPREADSHEET_ID).getUrl()}">Open the RSVP sheet</a></p>`,
   });
 }
 

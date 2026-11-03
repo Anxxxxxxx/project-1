@@ -22,9 +22,14 @@ The page already sends RSVPs to `anvita8126@gmail.com`.
 
 ## B. Google Sheet you can open in Excel
 
-1. Sign in to Google as `anvita8126@gmail.com` and create a new sheet at <https://sheets.new>.
-   Name it something like **Diwali RSVPs**.
-2. In the sheet, go to **Extensions ▸ Apps Script**.
+The script is already linked to the RSVP sheet:
+<https://docs.google.com/spreadsheets/d/1G5hdZNG5Yye6JGH5cOXwhZnxP-gkgCg6nYNS9ceGR1U/edit>
+
+The page can't write to a sheet from its link alone. Google needs a small script
+deployed from the account that owns the sheet. It's a one-time setup:
+
+1. Open the sheet above, signed in to the Google account that owns it.
+2. Go to **Extensions ▸ Apps Script**.
 3. Delete what's there, paste in the contents of [`google-sheet/Code.gs`](google-sheet/Code.gs), and click 💾 **Save**.
 4. Click **Deploy ▸ New deployment**:
    - Click ⚙️ next to "Select type" and choose **Web app**
@@ -32,12 +37,14 @@ The page already sends RSVPs to `anvita8126@gmail.com`.
    - **Who has access:** **Anyone**
    - Click **Deploy**, then **Authorize access** and allow the permissions.
      If Google warns "app isn't verified", click **Advanced ▸ Go to … (unsafe)**. It's your own script.
-5. Copy the **Web app URL** (it ends in `/exec`).
+5. Copy the **Web app URL** (it looks like `https://script.google.com/macros/s/…/exec`).
+   If you open it in a browser, it should say *"Diwali RSVP endpoint is live 🪔"*.
 6. Open `index.html` and paste it in:
    ```js
    const SHEET_URL = "https://script.google.com/macros/s/XXXXXXXX/exec";
    ```
-7. Send a test RSVP. A row should appear in the **RSVPs** tab and an email should arrive.
+7. Send a test RSVP. A new **RSVPs** tab appears in the sheet with your row,
+   and an email with the headcount arrives at anvita8126@gmail.com.
 
 **Downloading as Excel:** in the sheet, go to **File ▸ Download ▸ Microsoft Excel (.xlsx)**.
 You can do this as often as you like, since the sheet keeps updating.
