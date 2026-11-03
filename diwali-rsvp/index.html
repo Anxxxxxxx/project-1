@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Diwali Potluck RSVP</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #1a0b2e;
@@ -13,10 +13,12 @@
       --card-2: #351c58;
       --gold: #f7b733;
       --orange: #fc4a1a;
+      --ink: #2a1546;
       --text: #fff6e5;
       --muted: #d9c7f0;
       --border: #5a3a86;
       --error: #ff8a80;
+      --green: #7ddc8a;
       --radius: 14px;
     }
     * { box-sizing: border-box; }
@@ -31,25 +33,121 @@
       min-height: 100vh;
       padding: 32px 16px 64px;
     }
+    body.locked { overflow: hidden; }
     .wrap { max-width: 680px; margin: 0 auto; }
 
-    header { text-align: center; margin-bottom: 28px; }
+    /* ---------- Fireworks canvas ---------- */
+    #fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 60; }
+
+    /* ---------- Ticket ---------- */
+    .ticket {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 130px;
+      width: 100%;
+      max-width: 560px;
+      color: var(--ink);
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at 20% 120%, rgba(255,255,255,.35), transparent 45%),
+        repeating-radial-gradient(circle at 85% 50%, rgba(42,21,70,.06) 0 2px, transparent 2px 14px),
+        linear-gradient(120deg, #ffd56b, var(--gold) 40%, #ff8a3d 80%, var(--orange));
+      box-shadow: 0 25px 60px rgba(0,0,0,.55), 0 0 0 2px rgba(255,255,255,.25) inset;
+      overflow: hidden;
+    }
+    /* punched notches on the perforation line */
+    .ticket::before, .ticket::after {
+      content: ""; position: absolute; right: 130px; width: 28px; height: 28px;
+      background: var(--notch, var(--bg)); border-radius: 50%; transform: translateX(50%);
+    }
+    .ticket::before { top: -14px; }
+    .ticket::after { bottom: -14px; }
+    .ticket .main { padding: 22px 22px 20px; }
+    .ticket .stub {
+      border-left: 3px dashed rgba(42,21,70,.45);
+      padding: 18px 12px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; text-align: center; gap: 8px;
+    }
+    .ticket .eyebrow { font-size: .72rem; letter-spacing: .25em; text-transform: uppercase; font-weight: 600; opacity: .8; }
+    .ticket h2 {
+      font-family: "Playfair Display", serif; font-weight: 800;
+      font-size: clamp(1.6rem, 6vw, 2.3rem); line-height: 1.05; margin: 6px 0 4px;
+    }
+    .ticket .tag { font-size: .9rem; margin: 0 0 14px; }
+    .ticket .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
+    .ticket .facts div { font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; opacity: .75; }
+    .ticket .facts b { display: block; font-size: 1rem; letter-spacing: 0; text-transform: none; opacity: 1; color: var(--ink); }
+    .ticket .stub .admit { font-family: "Playfair Display", serif; font-weight: 800; font-size: 1.3rem; line-height: 1; }
+    .ticket .stub .diya { font-size: 2rem; }
+    .ticket .stub .serial { font-family: ui-monospace, monospace; font-size: .75rem; writing-mode: vertical-rl; transform: rotate(180deg); letter-spacing: .15em; }
+    .ticket .barcode {
+      height: 34px; width: 80px;
+      background: repeating-linear-gradient(90deg, var(--ink) 0 2px, transparent 2px 4px, var(--ink) 4px 5px, transparent 5px 8px, var(--ink) 8px 11px, transparent 11px 13px);
+      opacity: .8;
+    }
+    @media (max-width: 480px) {
+      .ticket { grid-template-columns: 1fr 92px; }
+      .ticket::before, .ticket::after { right: 92px; }
+      .ticket .main { padding: 18px 16px; }
+      .ticket .facts { grid-template-columns: 1fr; }
+    }
+
+    /* ---------- Entry invite overlay ---------- */
+    .overlay {
+      position: fixed; inset: 0; z-index: 50;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 22px; padding: 16px;
+      background: radial-gradient(circle at 50% 40%, rgba(70,30,110,.92), rgba(10,4,20,.97));
+      --notch: #2b1245;
+      transition: opacity .5s ease;
+    }
+    .overlay.closing { opacity: 0; }
+    .overlay .greeting {
+      font-family: "Playfair Display", serif; color: var(--gold); text-align: center;
+      font-size: clamp(1.1rem, 4vw, 1.4rem); margin: 0;
+      opacity: 0; animation: fadeUp .7s .2s forwards;
+    }
+    .pop { animation: ticketPop 1s cubic-bezier(.2,1.4,.4,1) .5s both; }
+    @keyframes ticketPop {
+      0%   { transform: translateY(60px) scale(.3) rotate(-14deg); opacity: 0; }
+      60%  { transform: translateY(-8px) scale(1.04) rotate(2deg); opacity: 1; }
+      100% { transform: none; opacity: 1; }
+    }
+    .shine { position: relative; }
+    .shine::marker { content: none; }
+    .ticket .glint {
+      position: absolute; inset: 0; pointer-events: none;
+      background: linear-gradient(110deg, transparent 35%, rgba(255,255,255,.55) 50%, transparent 65%);
+      transform: translateX(-120%);
+      animation: glint 2.8s 1.6s ease-in-out infinite;
+    }
+    @keyframes glint { 0% { transform: translateX(-120%); } 45%, 100% { transform: translateX(120%); } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+    .overlay .cta { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; opacity: 0; animation: fadeUp .6s 1.4s forwards; }
+    .overlay .cta button { width: auto; padding: 13px 28px; }
+    .ghost { background: transparent !important; color: var(--text) !important; border: 1px solid var(--border) !important; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .pop, .overlay .greeting, .overlay .cta { animation: none; opacity: 1; }
+      .ticket .glint { display: none; }
+    }
+
+    /* ---------- Page header ---------- */
+    header { text-align: center; margin-bottom: 24px; }
     .diyas { font-size: 2rem; letter-spacing: .4rem; }
     h1 {
       font-family: "Playfair Display", serif;
-      font-size: clamp(2rem, 6vw, 3rem);
-      margin: 8px 0 4px;
+      font-size: clamp(2rem, 6vw, 3rem); margin: 8px 0 4px;
       background: linear-gradient(90deg, var(--gold), var(--orange));
       -webkit-background-clip: text; background-clip: text; color: transparent;
     }
-    .subtitle { color: var(--muted); margin: 0 0 16px; }
-    .details {
-      display: inline-grid; gap: 4px; text-align: left;
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 14px 20px; font-size: .95rem;
+    .subtitle { color: var(--muted); margin: 0 0 14px; }
+    .mini-invite {
+      width: auto; display: inline-block; padding: 8px 18px; font-size: .9rem;
+      background: var(--card) !important; color: var(--gold) !important; border: 1px solid var(--border) !important;
     }
-    .details strong { color: var(--gold); }
 
+    /* ---------- Form ---------- */
     form, .thanks {
       background: var(--card); border: 1px solid var(--border);
       border-radius: var(--radius); padding: 24px;
@@ -67,6 +165,12 @@
     label, .label { display: block; font-weight: 500; margin-bottom: 6px; }
     .req { color: var(--orange); }
     .hint { font-size: .82rem; color: var(--muted); margin-top: 4px; }
+    .veg-note {
+      display: flex; gap: 10px; align-items: flex-start;
+      background: rgba(125,220,138,.1); border: 1px solid rgba(125,220,138,.45);
+      color: var(--text); border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; font-size: .92rem;
+    }
+    .veg-note b { color: var(--green); }
 
     input[type="text"], input[type="email"], input[type="tel"],
     input[type="number"], select, textarea {
@@ -87,46 +191,77 @@
     }
     .choice input:checked + span {
       background: linear-gradient(90deg, var(--gold), var(--orange));
-      border-color: transparent; color: #2a1546; font-weight: 600;
+      border-color: transparent; color: var(--ink); font-weight: 600;
     }
     .choice input:focus-visible + span { outline: 2px solid var(--gold); outline-offset: 2px; }
+    .check { display: flex; gap: 10px; align-items: flex-start; font-weight: 500; cursor: pointer; }
+    .check input { width: 18px; height: 18px; margin-top: 3px; accent-color: var(--gold); }
 
-    .hidden { display: none; }
+    .hidden { display: none !important; }
     .error { color: var(--error); font-size: .85rem; margin-top: 6px; min-height: 1em; }
 
     button {
       width: 100%; padding: 14px; font: inherit; font-weight: 600; font-size: 1.05rem;
-      color: #2a1546; border: 0; border-radius: 12px; cursor: pointer;
+      color: var(--ink); border: 0; border-radius: 12px; cursor: pointer;
       background: linear-gradient(90deg, var(--gold), var(--orange));
       transition: transform .1s, opacity .15s;
     }
     button:hover { transform: translateY(-1px); }
     button:disabled { opacity: .6; cursor: wait; }
 
-    .thanks { text-align: center; }
-    .thanks h2 { font-family: "Playfair Display", serif; color: var(--gold); }
+    /* ---------- Thank-you / entry pass ---------- */
+    .thanks { text-align: center; --notch: var(--card); }
+    .thanks h2.title { font-family: "Playfair Display", serif; color: var(--gold); margin: 6px 0; }
+    .thanks .ticket { margin: 20px auto; text-align: left; }
+    .thanks .pass-note { color: var(--muted); font-size: .9rem; }
     .summary {
       text-align: left; background: var(--card-2); border-radius: 10px;
       padding: 14px 18px; margin: 16px 0; line-height: 1.7; font-size: .95rem;
     }
     .summary b { color: var(--gold); }
-    .link-btn { background: none; color: var(--gold); text-decoration: underline; width: auto; padding: 6px; }
+    .link-btn { background: none !important; color: var(--gold) !important; text-decoration: underline; width: auto; padding: 6px; }
   </style>
 </head>
-<body>
+<body class="locked">
+  <canvas id="fx" aria-hidden="true"></canvas>
+
+  <!-- ===== Entry invitation: ticket pops up when the page opens ===== -->
+  <div class="overlay" id="invite" role="dialog" aria-modal="true" aria-labelledby="inviteTitle">
+    <p class="greeting">✨ You've received a golden ticket ✨</p>
+    <div class="ticket pop">
+      <div class="glint"></div>
+      <div class="main">
+        <div class="eyebrow">You're invited · Shubh Deepavali</div>
+        <h2 id="inviteTitle">Diwali Night<br>Potluck Party</h2>
+        <p class="tag">Lights, laughter, card games &amp; homemade vegetarian food!</p>
+        <!-- ✏️ Edit party details here (and in the entry pass further below) -->
+        <div class="facts">
+          <div>Date<b>Sat, 7 November</b></div>
+          <div>Time<b>9:00 PM onwards</b></div>
+          <div>Where<b>Our place 🏠</b></div>
+          <div>Dress code<b>Festive / ethnic</b></div>
+          <div>On the menu<b>🌿 Veg potluck</b></div>
+          <div>Fun<b>🃏 Cards &amp; party games</b></div>
+        </div>
+      </div>
+      <div class="stub">
+        <div class="diya">🪔</div>
+        <div class="admit">ADMIT<br>YOU</div>
+        <div style="font-size:.72rem;font-weight:600">RSVP BY<br>5 NOV</div>
+        <div class="barcode" aria-hidden="true"></div>
+      </div>
+    </div>
+    <div class="cta">
+      <button type="button" id="rsvpNowBtn">Claim my spot · RSVP ✨</button>
+    </div>
+  </div>
+
   <div class="wrap">
     <header>
       <div class="diyas" aria-hidden="true">🪔✨🪔</div>
       <h1>Diwali Potluck Party</h1>
-      <p class="subtitle">Join us for an evening of lights, laughter &amp; homemade food!</p>
-      <!-- ✏️ Edit the party details below -->
-      <div class="details">
-        <div><strong>📅 Date:</strong> Saturday, November 7, 2026</div>
-        <div><strong>⏰ Time:</strong> 6:30 PM onwards</div>
-        <div><strong>📍 Where:</strong> Our place — address shared on RSVP</div>
-        <div><strong>👗 Dress code:</strong> Festive / ethnic wear</div>
-        <div><strong>📝 RSVP by:</strong> November 5</div>
-      </div>
+      <p class="subtitle">Saturday, 7 November · 9:00 PM · Please RSVP by <b>Thursday, 5 November</b></p>
+      <button type="button" class="mini-invite" id="viewInviteBtn">🎟️ View invitation</button>
     </header>
 
     <form id="rsvp" novalidate>
@@ -184,6 +319,10 @@
 
         <fieldset>
           <legend>Potluck Contribution 🍛</legend>
+          <div class="veg-note">
+            <span aria-hidden="true">🌿</span>
+            <span>This is a <b>vegetarian-only</b> party. Please bring dishes with no meat, fish or egg.</span>
+          </div>
           <div class="field">
             <label for="category">What type of dish? <span class="req">*</span></label>
             <select id="category" name="category">
@@ -203,19 +342,11 @@
           </div>
           <div class="field">
             <label for="dish">Dish name</label>
-            <input type="text" id="dish" name="dish" placeholder="e.g. Paneer Tikka, Gulab Jamun, Samosas">
+            <input type="text" id="dish" name="dish" placeholder="e.g. Paneer Tikka, Veg Biryani, Gulab Jamun">
             <div class="hint">Helps us avoid five people bringing the same thing!</div>
             <div class="error" data-for="dish"></div>
           </div>
           <div class="row">
-            <div class="field">
-              <span class="label">Veg or non-veg?</span>
-              <div class="choices">
-                <label class="choice"><input type="radio" name="dietType" value="Veg" checked><span>🟢 Veg</span></label>
-                <label class="choice"><input type="radio" name="dietType" value="Vegan"><span>🌱 Vegan</span></label>
-                <label class="choice"><input type="radio" name="dietType" value="Non-veg"><span>🔴 Non-veg</span></label>
-              </div>
-            </div>
             <div class="field">
               <label for="servings">Approx. servings</label>
               <select id="servings" name="servings">
@@ -225,6 +356,13 @@
                 <option>20+</option>
               </select>
             </div>
+            <div class="field">
+              <span class="label">My dish is also…</span>
+              <div class="choices">
+                <label class="choice"><input type="checkbox" name="dishAlso" value="Vegan"><span>🌱 Vegan</span></label>
+                <label class="choice"><input type="checkbox" name="dishAlso" value="Jain-friendly"><span>🙏 Jain</span></label>
+              </div>
+            </div>
           </div>
           <div class="field">
             <span class="label">Does your dish contain any of these?</span>
@@ -232,9 +370,8 @@
               <label class="choice"><input type="checkbox" name="allergens" value="Nuts"><span>🥜 Nuts</span></label>
               <label class="choice"><input type="checkbox" name="allergens" value="Dairy"><span>🥛 Dairy</span></label>
               <label class="choice"><input type="checkbox" name="allergens" value="Gluten"><span>🌾 Gluten</span></label>
-              <label class="choice"><input type="checkbox" name="allergens" value="Egg"><span>🥚 Egg</span></label>
               <label class="choice"><input type="checkbox" name="allergens" value="Onion/Garlic"><span>🧅 Onion / Garlic</span></label>
-              <label class="choice"><input type="checkbox" name="allergens" value="Spicy"><span>🌶️ Very spicy</span></label>
+              <label class="choice"><input type="checkbox" name="allergens" value="Very spicy"><span>🌶️ Very spicy</span></label>
             </div>
           </div>
           <div class="field">
@@ -243,6 +380,38 @@
               <label class="choice"><input type="checkbox" name="needs" value="Reheating"><span>🔥 Reheating</span></label>
               <label class="choice"><input type="checkbox" name="needs" value="Fridge space"><span>❄️ Fridge space</span></label>
               <label class="choice"><input type="checkbox" name="needs" value="Serving spoon"><span>🥄 Serving spoon</span></label>
+            </div>
+          </div>
+          <div class="field">
+            <label class="check">
+              <input type="checkbox" id="vegConfirm" name="vegConfirm" value="Confirmed 100% vegetarian">
+              <span>I confirm my dish is 100% vegetarian (no meat, fish or egg) <span class="req">*</span></span>
+            </label>
+            <div class="error" data-for="vegConfirm"></div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Game Night 🃏🎲</legend>
+          <div class="field">
+            <span class="label">Which games are you most excited about?</span>
+            <div class="choices">
+              <label class="choice"><input type="checkbox" name="games" value="Teen Patti"><span>🃏 Teen Patti</span></label>
+              <label class="choice"><input type="checkbox" name="games" value="Rummy"><span>♠️ Rummy</span></label>
+              <label class="choice"><input type="checkbox" name="games" value="UNO"><span>🟥 UNO</span></label>
+              <label class="choice"><input type="checkbox" name="games" value="Tambola / Housie"><span>🔢 Tambola / Housie</span></label>
+              <label class="choice"><input type="checkbox" name="games" value="Dumb Charades"><span>🎭 Dumb Charades</span></label>
+              <label class="choice"><input type="checkbox" name="games" value="Antakshari"><span>🎤 Antakshari</span></label>
+              <label class="choice"><input type="checkbox" name="games" value="Pictionary"><span>✏️ Pictionary</span></label>
+              <label class="choice"><input type="checkbox" name="games" value="Mafia"><span>🕵️ Mafia</span></label>
+            </div>
+          </div>
+          <div class="field">
+            <span class="label">Can you bring a game along?</span>
+            <div class="choices">
+              <label class="choice"><input type="checkbox" name="bringGame" value="Deck of cards"><span>🃏 Deck of cards</span></label>
+              <label class="choice"><input type="checkbox" name="bringGame" value="Board / party game"><span>🎲 Board / party game</span></label>
+              <label class="choice"><input type="checkbox" name="bringGame" value="Speaker"><span>🔊 Bluetooth speaker</span></label>
             </div>
           </div>
         </fieldset>
@@ -260,16 +429,7 @@
               <label class="choice"><input type="checkbox" name="help" value="Decor & diyas"><span>🪔 Decor &amp; diyas</span></label>
               <label class="choice"><input type="checkbox" name="help" value="Setup"><span>🪑 Setup</span></label>
               <label class="choice"><input type="checkbox" name="help" value="Cleanup"><span>🧹 Cleanup</span></label>
-              <label class="choice"><input type="checkbox" name="help" value="Music / DJ"><span>🎶 Music</span></label>
-            </div>
-          </div>
-          <div class="field">
-            <span class="label">Interested in any activities?</span>
-            <div class="choices">
-              <label class="choice"><input type="checkbox" name="activities" value="Lakshmi puja"><span>🙏 Lakshmi puja</span></label>
-              <label class="choice"><input type="checkbox" name="activities" value="Card games"><span>🃏 Card games</span></label>
-              <label class="choice"><input type="checkbox" name="activities" value="Dancing"><span>💃 Dancing</span></label>
-              <label class="choice"><input type="checkbox" name="activities" value="Sparklers"><span>🎇 Sparklers</span></label>
+              <label class="choice"><input type="checkbox" name="help" value="Hosting a game"><span>🎲 Hosting a game</span></label>
             </div>
           </div>
           <div class="field">
@@ -282,8 +442,7 @@
       <fieldset>
         <legend>Message for the host</legend>
         <div class="field">
-          <label for="message" class="hidden">Message</label>
-          <textarea id="message" name="message" placeholder="Wishes, questions, or anything else…"></textarea>
+          <textarea id="message" name="message" aria-label="Message for the host" placeholder="Wishes, questions, or anything else…"></textarea>
         </div>
       </fieldset>
 
@@ -291,10 +450,33 @@
       <div class="error" id="submitError" style="text-align:center"></div>
     </form>
 
+    <!-- ===== After RSVP: personal entry pass ===== -->
     <div class="thanks hidden" id="thanks" aria-live="polite">
       <div class="diyas" aria-hidden="true">🪔🎆🪔</div>
-      <h2 id="thanksTitle">Thank you!</h2>
+      <h2 class="title" id="thanksTitle">Thank you!</h2>
       <p id="thanksText"></p>
+
+      <div class="ticket pop" id="pass">
+        <div class="glint"></div>
+        <div class="main">
+          <div class="eyebrow">Entry Pass · Diwali Night</div>
+          <h2 id="passName">Guest</h2>
+          <p class="tag" id="passParty"></p>
+          <div class="facts">
+            <div>Date<b>Sat, 7 November</b></div>
+            <div>Time<b>9:00 PM onwards</b></div>
+            <div>Bringing<b id="passDish">—</b></div>
+            <div>Status<b id="passStatus">Confirmed</b></div>
+          </div>
+        </div>
+        <div class="stub">
+          <div class="diya">🪔</div>
+          <div class="admit" id="passAdmit">ADMIT<br>1</div>
+          <div class="serial" id="passSerial">DW-0000</div>
+        </div>
+      </div>
+      <p class="pass-note" id="passNote">📸 Screenshot your pass and show it at the door!</p>
+
       <div class="summary" id="summary"></div>
       <button type="button" class="link-btn" id="editBtn">Edit my response</button>
     </div>
@@ -310,23 +492,92 @@
      * Responses will be emailed to you (and viewable/exportable as CSV).
      *
      * If left empty, the page runs in demo mode: it validates and shows the
-     * summary, but nothing is sent anywhere.
+     * entry pass, but nothing is sent anywhere.
      */
     const FORM_ENDPOINT = "";
 
-    const form = document.getElementById("rsvp");
-    const attendingSection = document.getElementById("attendingSection");
-    const thanks = document.getElementById("thanks");
+    const $ = (id) => document.getElementById(id);
+    const form = $("rsvp");
+    const invite = $("invite");
+    const thanks = $("thanks");
+    const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // Show guest + potluck sections only for Yes / Maybe
+    /* ---------- Fireworks ---------- */
+    const fx = (() => {
+      const c = $("fx"), ctx = c.getContext("2d");
+      const colors = ["#f7b733", "#fc4a1a", "#ffd56b", "#ff6bd6", "#7ddc8a", "#6bc5ff", "#ffffff"];
+      let parts = [], until = 0, raf = 0;
+      const resize = () => { c.width = innerWidth * devicePixelRatio; c.height = innerHeight * devicePixelRatio; };
+      addEventListener("resize", resize); resize();
+
+      function burst(x, y) {
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const n = 60 + Math.random() * 40;
+        for (let i = 0; i < n; i++) {
+          const a = Math.random() * Math.PI * 2, s = (1.5 + Math.random() * 4.5) * devicePixelRatio;
+          parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: 1, color: Math.random() < .2 ? "#fff" : color });
+        }
+      }
+      function tick(t) {
+        ctx.globalCompositeOperation = "destination-out";
+        ctx.fillStyle = "rgba(0,0,0,.22)";
+        ctx.fillRect(0, 0, c.width, c.height);
+        ctx.globalCompositeOperation = "lighter";
+        if (t < until && Math.random() < .07) {
+          burst(c.width * (.1 + Math.random() * .8), c.height * (.1 + Math.random() * .45));
+        }
+        parts = parts.filter(p => p.life > 0);
+        for (const p of parts) {
+          p.x += p.vx; p.y += p.vy; p.vy += .05 * devicePixelRatio; p.vx *= .985; p.vy *= .985; p.life -= .012;
+          ctx.globalAlpha = Math.max(p.life, 0);
+          ctx.fillStyle = p.color;
+          ctx.beginPath(); ctx.arc(p.x, p.y, 2.2 * devicePixelRatio, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+        if (t < until || parts.length) raf = requestAnimationFrame(tick);
+        else { ctx.clearRect(0, 0, c.width, c.height); raf = 0; }
+      }
+      return {
+        play(ms = 3500) {
+          if (reduceMotion) return;
+          until = performance.now() + ms;
+          for (let i = 0; i < 3; i++) setTimeout(() => burst(c.width * (.2 + .3 * i), c.height * (.2 + Math.random() * .2)), i * 250);
+          if (!raf) raf = requestAnimationFrame(tick);
+        }
+      };
+    })();
+
+    /* ---------- Entry invitation ---------- */
+    function restartPop(el) { el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop"); }
+
+    function openInvite() {
+      invite.classList.remove("hidden", "closing");
+      document.body.classList.add("locked");
+      restartPop(invite.querySelector(".ticket"));
+      setTimeout(() => fx.play(3500), 600);
+      $("rsvpNowBtn").focus({ preventScroll: true });
+    }
+    function closeInvite() {
+      invite.classList.add("closing");
+      setTimeout(() => {
+        invite.classList.add("hidden");
+        document.body.classList.remove("locked");
+        $("name").focus({ preventScroll: true });
+      }, 450);
+    }
+    $("rsvpNowBtn").addEventListener("click", closeInvite);
+    $("viewInviteBtn").addEventListener("click", openInvite);
+    addEventListener("keydown", (e) => { if (e.key === "Escape" && !invite.classList.contains("hidden")) closeInvite(); });
+    openInvite();
+
+    /* ---------- Form behaviour ---------- */
     form.addEventListener("change", (e) => {
       if (e.target.name === "attending") {
         attendingSection.classList.toggle("hidden", e.target.value === "No");
         setError("attending", "");
       }
+      if (e.target.name === "vegConfirm") setError("vegConfirm", "");
     });
-
-    // Clear a field's error as soon as the guest edits it
     form.addEventListener("input", (e) => {
       const key = ["email", "phone"].includes(e.target.name) ? "contact" : e.target.name;
       setError(key, "");
@@ -344,16 +595,15 @@
         data[k] = data[k] ? `${data[k]}, ${v}` : v;
       }
       if (data.attending === "No") {
-        // Drop potluck/guest fields if not attending
-        ["adults","kids","guestNames","category","dish","dietType","servings",
-         "allergens","needs","dietary","help","activities","song"].forEach(k => delete data[k]);
+        ["adults","kids","guestNames","category","dish","servings","dishAlso","allergens",
+         "needs","vegConfirm","games","bringGame","dietary","help","song"].forEach(k => delete data[k]);
       }
       return data;
     }
 
     function validate(data) {
       let ok = true;
-      ["name","contact","attending","category","dish"].forEach(k => setError(k, ""));
+      ["name","contact","attending","category","dish","vegConfirm"].forEach(k => setError(k, ""));
 
       if (!data.name?.trim()) { setError("name", "Please enter your name."); ok = false; }
       if (!data.email?.trim() && !data.phone?.trim()) {
@@ -363,10 +613,10 @@
       }
       if (!data.attending) { setError("attending", "Please let us know if you're coming."); ok = false; }
       if (data.attending && data.attending !== "No") {
+        const isFood = data.category && !data.category.startsWith("Not sure") && !data.category.startsWith("Plates");
         if (!data.category) { setError("category", "Please pick what you'd like to bring."); ok = false; }
-        else if (!data.category.startsWith("Not sure") && !data.category.startsWith("Plates") && !data.dish?.trim()) {
-          setError("dish", "Please tell us the dish name."); ok = false;
-        }
+        else if (isFood && !data.dish?.trim()) { setError("dish", "Please tell us the dish name."); ok = false; }
+        if (isFood && !data.vegConfirm) { setError("vegConfirm", "Please confirm your dish is vegetarian."); ok = false; }
       }
       return ok;
     }
@@ -374,23 +624,49 @@
     const LABELS = {
       name: "Name", email: "Email", phone: "Phone", attending: "Attending",
       adults: "Adults", kids: "Kids", guestNames: "Coming with", category: "Bringing",
-      dish: "Dish", dietType: "Type", servings: "Servings", allergens: "Contains",
-      needs: "Needs", dietary: "Dietary notes", help: "Helping with",
-      activities: "Activities", song: "Song request", message: "Message"
+      dish: "Dish", servings: "Servings", dishAlso: "Dish is also", allergens: "Contains",
+      needs: "Needs", vegConfirm: "Vegetarian", games: "Excited for", bringGame: "Bringing along",
+      dietary: "Dietary notes", help: "Helping with", song: "Song request", message: "Message"
     };
 
     function escapeHtml(s) {
       return String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
     }
 
+    function serialFor(name) {
+      let h = 0;
+      for (const ch of name.toLowerCase()) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+      return "DW-" + String(h % 10000).padStart(4, "0");
+    }
+
     function showThanks(data) {
+      const first = data.name.trim().split(/\s+/)[0];
       const going = data.attending !== "No";
-      document.getElementById("thanksTitle").textContent =
-        going ? `See you soon, ${data.name.split(" ")[0]}! 🎉` : `We'll miss you, ${data.name.split(" ")[0]}!`;
-      document.getElementById("thanksText").textContent = going
-        ? "Your RSVP is in. Get ready for diyas, mithai and lots of fun!"
+      const adults = Number(data.adults || 1), kids = Number(data.kids || 0);
+      const total = adults + kids;
+
+      $("thanksTitle").textContent = going ? `See you soon, ${first}! 🎉` : `We'll miss you, ${first}!`;
+      $("thanksText").textContent = going
+        ? "Your RSVP is in. Here's your entry pass for Diwali Night!"
         : "Thanks for letting us know. Wishing you a very Happy Diwali! 🪔";
-      document.getElementById("summary").innerHTML = Object.entries(data)
+
+      const pass = $("pass");
+      pass.classList.toggle("hidden", !going);
+      $("passNote").classList.toggle("hidden", !going);
+      if (going) {
+        $("passName").textContent = data.name.trim();
+        $("passParty").textContent = total > 1
+          ? `+ ${total - 1} guest${total > 2 ? "s" : ""} (${adults} adult${adults > 1 ? "s" : ""}${kids ? `, ${kids} kid${kids > 1 ? "s" : ""}` : ""})`
+          : "Party of one, ready to play!";
+        $("passDish").textContent = data.dish?.trim() || data.category || "—";
+        $("passStatus").textContent = data.attending === "Yes" ? "✅ Confirmed" : "🤔 Tentative";
+        $("passAdmit").innerHTML = `ADMIT<br>${total}`;
+        $("passSerial").textContent = serialFor(data.name);
+        restartPop(pass);
+        setTimeout(() => fx.play(4000), 500);
+      }
+
+      $("summary").innerHTML = Object.entries(data)
         .filter(([, v]) => String(v).trim())
         .map(([k, v]) => `<div><b>${LABELS[k] || k}:</b> ${escapeHtml(v)}</div>`)
         .join("");
@@ -407,8 +683,8 @@
         return;
       }
 
-      const btn = document.getElementById("submitBtn");
-      const submitError = document.getElementById("submitError");
+      const btn = $("submitBtn");
+      const submitError = $("submitError");
       submitError.textContent = "";
 
       if (!FORM_ENDPOINT) { showThanks(data); return; } // demo mode
@@ -429,7 +705,7 @@
       }
     });
 
-    document.getElementById("editBtn").addEventListener("click", () => {
+    $("editBtn").addEventListener("click", () => {
       thanks.classList.add("hidden");
       form.classList.remove("hidden");
     });
