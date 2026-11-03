@@ -264,7 +264,11 @@
       <button type="button" class="mini-invite" id="viewInviteBtn">🎟️ View invitation</button>
     </header>
 
-    <form id="rsvp" novalidate>
+    <!-- action/method are a no-JavaScript fallback: the RSVP is still emailed to the host -->
+    <form id="rsvp" novalidate action="https://formsubmit.co/anvita8126@gmail.com" method="POST">
+      <input type="hidden" name="_subject" value="New Diwali Party RSVP">
+      <input type="hidden" name="_template" value="table">
+      <input type="text" name="_honey" class="hidden" tabindex="-1" autocomplete="off" aria-hidden="true">
       <!-- 1. Guest info -->
       <fieldset>
         <legend>Your Details</legend>
@@ -484,17 +488,16 @@
 
   <script>
     /*
-     * HOW RESPONSES ARE COLLECTED
-     * ---------------------------
-     * This is a static page, so it needs a form backend to receive RSVPs.
-     * Easiest option: create a free form at https://formspree.io, then paste
-     * its endpoint below, e.g. "https://formspree.io/f/abcd1234".
-     * Responses will be emailed to you (and viewable/exportable as CSV).
-     *
-     * If left empty, the page runs in demo mode: it validates and shows the
-     * entry pass, but nothing is sent anywhere.
+     * WHERE RSVPs GO  (see SETUP.md)
+     * -------------------------------
+     * SHEET_URL  – Google Apps Script web-app URL (from google-sheet/Code.gs).
+     *              Every RSVP becomes a row in a Google Sheet (download as
+     *              Excel any time) and the host also gets an email.
+     * HOST_EMAIL – Used when SHEET_URL is empty: each RSVP is emailed to the
+     *              host via FormSubmit (host clicks "Activate" once, first time).
      */
-    const FORM_ENDPOINT = "";
+    const SHEET_URL = "";
+    const HOST_EMAIL = "anvita8126@gmail.com";
 
     const $ = (id) => document.getElementById(id);
     const form = $("rsvp");
@@ -675,6 +678,32 @@
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
+    /* ---------- Sending ---------- */
+    // Google Sheet (Apps Script). A form-encoded body keeps it a "simple" request (no CORS preflight).
+    async function sendToSheet(data) {
+      const body = new URLSearchParams(data);
+      try {
+        const res = await fetch(SHEET_URL, { method: "POST", body });
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.error || "Sheet rejected the RSVP");
+      } catch (err) {
+        if (!(err instanceof TypeError)) throw err;
+        // Response unreadable cross-origin: send blind (the row is still written).
+        await fetch(SHEET_URL, { method: "POST", body, mode: "no-cors" });
+      }
+    }
+
+    // Email straight to the host via FormSubmit.
+    async function sendByEmail(data) {
+      const res = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(HOST_EMAIL)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({ ...data, _template: "table" })
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || String(json.success) !== "true") throw new Error(json.message || `HTTP ${res.status}`);
+    }
+
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const data = collect();
@@ -687,19 +716,20 @@
       const submitError = $("submitError");
       submitError.textContent = "";
 
-      if (!FORM_ENDPOINT) { showThanks(data); return; } // demo mode
+      if (data._honey) return; // spam bot
+      delete data._honey;
+      delete data._template;
+      data._subject = `Diwali RSVP: ${data.name} (${data.attending})`;
 
       btn.disabled = true; btn.textContent = "Sending…";
       try {
-        const res = await fetch(FORM_ENDPOINT, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Accept": "application/json" },
-          body: JSON.stringify({ _subject: `Diwali RSVP: ${data.name} (${data.attending})`, ...data })
-        });
-        if (!res.ok) throw new Error(res.status);
+        if (SHEET_URL) await sendToSheet(data);
+        else await sendByEmail(data);
+        delete data._subject;
         showThanks(data);
-      } catch {
-        submitError.textContent = "Oops, something went wrong sending your RSVP. Please try again.";
+      } catch (err) {
+        console.error(err);
+        submitError.textContent = "Oops, your RSVP couldn't be sent. Please check your internet and try again.";
       } finally {
         btn.disabled = false; btn.textContent = "Send RSVP ✨";
       }
