@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Diwali Potluck RSVP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #1a0b2e;
+      --card: #2a1546;
+      --card-2: #351c58;
+      --gold: #f7b733;
+      --orange: #fc4a1a;
+      --text: #fff6e5;
+      --muted: #d9c7f0;
+      --border: #5a3a86;
+      --error: #ff8a80;
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Poppins", system-ui, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 15% 10%, rgba(247,183,51,.18), transparent 35%),
+        radial-gradient(circle at 85% 30%, rgba(252,74,26,.15), transparent 35%),
+        var(--bg);
+      min-height: 100vh;
+      padding: 32px 16px 64px;
+    }
+    .wrap { max-width: 680px; margin: 0 auto; }
+
+    header { text-align: center; margin-bottom: 28px; }
+    .diyas { font-size: 2rem; letter-spacing: .4rem; }
+    h1 {
+      font-family: "Playfair Display", serif;
+      font-size: clamp(2rem, 6vw, 3rem);
+      margin: 8px 0 4px;
+      background: linear-gradient(90deg, var(--gold), var(--orange));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .subtitle { color: var(--muted); margin: 0 0 16px; }
+    .details {
+      display: inline-grid; gap: 4px; text-align: left;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px 20px; font-size: .95rem;
+    }
+    .details strong { color: var(--gold); }
+
+    form, .thanks {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 24px;
+      box-shadow: 0 10px 40px rgba(0,0,0,.35);
+    }
+    fieldset { border: 0; padding: 0; margin: 0 0 26px; }
+    legend {
+      font-family: "Playfair Display", serif; font-size: 1.3rem;
+      color: var(--gold); margin-bottom: 14px; padding: 0;
+    }
+    .field { margin-bottom: 16px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 520px) { .row { grid-template-columns: 1fr; } }
+
+    label, .label { display: block; font-weight: 500; margin-bottom: 6px; }
+    .req { color: var(--orange); }
+    .hint { font-size: .82rem; color: var(--muted); margin-top: 4px; }
+
+    input[type="text"], input[type="email"], input[type="tel"],
+    input[type="number"], select, textarea {
+      width: 100%; padding: 11px 13px; font: inherit; color: var(--text);
+      background: var(--card-2); border: 1px solid var(--border);
+      border-radius: 10px; outline: none; transition: border-color .15s;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--gold); }
+    textarea { resize: vertical; min-height: 80px; }
+    select option { background: var(--card); }
+
+    .choices { display: flex; flex-wrap: wrap; gap: 10px; }
+    .choice input { position: absolute; opacity: 0; pointer-events: none; }
+    .choice span {
+      display: inline-block; padding: 9px 16px; border-radius: 999px;
+      border: 1px solid var(--border); background: var(--card-2);
+      cursor: pointer; user-select: none; transition: all .15s;
+    }
+    .choice input:checked + span {
+      background: linear-gradient(90deg, var(--gold), var(--orange));
+      border-color: transparent; color: #2a1546; font-weight: 600;
+    }
+    .choice input:focus-visible + span { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+    .hidden { display: none; }
+    .error { color: var(--error); font-size: .85rem; margin-top: 6px; min-height: 1em; }
+
+    button {
+      width: 100%; padding: 14px; font: inherit; font-weight: 600; font-size: 1.05rem;
+      color: #2a1546; border: 0; border-radius: 12px; cursor: pointer;
+      background: linear-gradient(90deg, var(--gold), var(--orange));
+      transition: transform .1s, opacity .15s;
+    }
+    button:hover { transform: translateY(-1px); }
+    button:disabled { opacity: .6; cursor: wait; }
+
+    .thanks { text-align: center; }
+    .thanks h2 { font-family: "Playfair Display", serif; color: var(--gold); }
+    .summary {
+      text-align: left; background: var(--card-2); border-radius: 10px;
+      padding: 14px 18px; margin: 16px 0; line-height: 1.7; font-size: .95rem;
+    }
+    .summary b { color: var(--gold); }
+    .link-btn { background: none; color: var(--gold); text-decoration: underline; width: auto; padding: 6px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="diyas" aria-hidden="true">🪔✨🪔</div>
+      <h1>Diwali Potluck Party</h1>
+      <p class="subtitle">Join us for an evening of lights, laughter &amp; homemade food!</p>
+      <!-- ✏️ Edit the party details below -->
+      <div class="details">
+        <div><strong>📅 Date:</strong> Saturday, November 7, 2026</div>
+        <div><strong>⏰ Time:</strong> 6:30 PM onwards</div>
+        <div><strong>📍 Where:</strong> Our place — address shared on RSVP</div>
+        <div><strong>👗 Dress code:</strong> Festive / ethnic wear</div>
+        <div><strong>📝 RSVP by:</strong> November 5</div>
+      </div>
+    </header>
+
+    <form id="rsvp" novalidate>
+      <!-- 1. Guest info -->
+      <fieldset>
+        <legend>Your Details</legend>
+        <div class="field">
+          <label for="name">Full name <span class="req">*</span></label>
+          <input type="text" id="name" name="name" autocomplete="name" required>
+          <div class="error" data-for="name"></div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" autocomplete="email">
+          </div>
+          <div class="field">
+            <label for="phone">Phone / WhatsApp</label>
+            <input type="tel" id="phone" name="phone" autocomplete="tel">
+          </div>
+        </div>
+        <div class="error" data-for="contact"></div>
+      </fieldset>
+
+      <!-- 2. Attendance -->
+      <fieldset>
+        <legend>Will you be joining us? <span class="req">*</span></legend>
+        <div class="choices" role="radiogroup">
+          <label class="choice"><input type="radio" name="attending" value="Yes"><span>🎉 Yes, I'll be there!</span></label>
+          <label class="choice"><input type="radio" name="attending" value="No"><span>😢 Sorry, can't make it</span></label>
+          <label class="choice"><input type="radio" name="attending" value="Maybe"><span>🤔 Maybe</span></label>
+        </div>
+        <div class="error" data-for="attending"></div>
+      </fieldset>
+
+      <!-- Shown only for Yes / Maybe -->
+      <div id="attendingSection" class="hidden">
+        <fieldset>
+          <legend>Guests</legend>
+          <div class="row">
+            <div class="field">
+              <label for="adults">Adults (incl. you)</label>
+              <input type="number" id="adults" name="adults" min="1" max="10" value="1">
+            </div>
+            <div class="field">
+              <label for="kids">Kids</label>
+              <input type="number" id="kids" name="kids" min="0" max="10" value="0">
+            </div>
+          </div>
+          <div class="field">
+            <label for="guestNames">Names of people coming with you</label>
+            <input type="text" id="guestNames" name="guestNames" placeholder="e.g. Priya, Arjun">
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Potluck Contribution 🍛</legend>
+          <div class="field">
+            <label for="category">What type of dish? <span class="req">*</span></label>
+            <select id="category" name="category">
+              <option value="">— Select a category —</option>
+              <option>Appetizer / Chaat</option>
+              <option>Main Course (Curry / Sabzi)</option>
+              <option>Rice / Biryani / Pulao</option>
+              <option>Bread (Roti / Puri / Naan)</option>
+              <option>Salad / Raita</option>
+              <option>Mithai / Dessert</option>
+              <option>Namkeen / Snacks</option>
+              <option>Drinks (Lassi / Chai / Mocktails)</option>
+              <option>Plates, cups &amp; cutlery</option>
+              <option>Not sure yet — host, please assign me</option>
+            </select>
+            <div class="error" data-for="category"></div>
+          </div>
+          <div class="field">
+            <label for="dish">Dish name</label>
+            <input type="text" id="dish" name="dish" placeholder="e.g. Paneer Tikka, Gulab Jamun, Samosas">
+            <div class="hint">Helps us avoid five people bringing the same thing!</div>
+            <div class="error" data-for="dish"></div>
+          </div>
+          <div class="row">
+            <div class="field">
+              <span class="label">Veg or non-veg?</span>
+              <div class="choices">
+                <label class="choice"><input type="radio" name="dietType" value="Veg" checked><span>🟢 Veg</span></label>
+                <label class="choice"><input type="radio" name="dietType" value="Vegan"><span>🌱 Vegan</span></label>
+                <label class="choice"><input type="radio" name="dietType" value="Non-veg"><span>🔴 Non-veg</span></label>
+              </div>
+            </div>
+            <div class="field">
+              <label for="servings">Approx. servings</label>
+              <select id="servings" name="servings">
+                <option>5–10</option>
+                <option selected>10–15</option>
+                <option>15–20</option>
+                <option>20+</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <span class="label">Does your dish contain any of these?</span>
+            <div class="choices">
+              <label class="choice"><input type="checkbox" name="allergens" value="Nuts"><span>🥜 Nuts</span></label>
+              <label class="choice"><input type="checkbox" name="allergens" value="Dairy"><span>🥛 Dairy</span></label>
+              <label class="choice"><input type="checkbox" name="allergens" value="Gluten"><span>🌾 Gluten</span></label>
+              <label class="choice"><input type="checkbox" name="allergens" value="Egg"><span>🥚 Egg</span></label>
+              <label class="choice"><input type="checkbox" name="allergens" value="Onion/Garlic"><span>🧅 Onion / Garlic</span></label>
+              <label class="choice"><input type="checkbox" name="allergens" value="Spicy"><span>🌶️ Very spicy</span></label>
+            </div>
+          </div>
+          <div class="field">
+            <span class="label">Will your dish need anything?</span>
+            <div class="choices">
+              <label class="choice"><input type="checkbox" name="needs" value="Reheating"><span>🔥 Reheating</span></label>
+              <label class="choice"><input type="checkbox" name="needs" value="Fridge space"><span>❄️ Fridge space</span></label>
+              <label class="choice"><input type="checkbox" name="needs" value="Serving spoon"><span>🥄 Serving spoon</span></label>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>A Little More</legend>
+          <div class="field">
+            <label for="dietary">Your own dietary restrictions or allergies</label>
+            <input type="text" id="dietary" name="dietary" placeholder="e.g. Jain, gluten-free, nut allergy">
+          </div>
+          <div class="field">
+            <span class="label">Want to help out? (optional)</span>
+            <div class="choices">
+              <label class="choice"><input type="checkbox" name="help" value="Rangoli"><span>🎨 Rangoli</span></label>
+              <label class="choice"><input type="checkbox" name="help" value="Decor & diyas"><span>🪔 Decor &amp; diyas</span></label>
+              <label class="choice"><input type="checkbox" name="help" value="Setup"><span>🪑 Setup</span></label>
+              <label class="choice"><input type="checkbox" name="help" value="Cleanup"><span>🧹 Cleanup</span></label>
+              <label class="choice"><input type="checkbox" name="help" value="Music / DJ"><span>🎶 Music</span></label>
+            </div>
+          </div>
+          <div class="field">
+            <span class="label">Interested in any activities?</span>
+            <div class="choices">
+              <label class="choice"><input type="checkbox" name="activities" value="Lakshmi puja"><span>🙏 Lakshmi puja</span></label>
+              <label class="choice"><input type="checkbox" name="activities" value="Card games"><span>🃏 Card games</span></label>
+              <label class="choice"><input type="checkbox" name="activities" value="Dancing"><span>💃 Dancing</span></label>
+              <label class="choice"><input type="checkbox" name="activities" value="Sparklers"><span>🎇 Sparklers</span></label>
+            </div>
+          </div>
+          <div class="field">
+            <label for="song">Song request for the playlist 🎵</label>
+            <input type="text" id="song" name="song" placeholder="Your favourite Bollywood banger">
+          </div>
+        </fieldset>
+      </div>
+
+      <fieldset>
+        <legend>Message for the host</legend>
+        <div class="field">
+          <label for="message" class="hidden">Message</label>
+          <textarea id="message" name="message" placeholder="Wishes, questions, or anything else…"></textarea>
+        </div>
+      </fieldset>
+
+      <button type="submit" id="submitBtn">Send RSVP ✨</button>
+      <div class="error" id="submitError" style="text-align:center"></div>
+    </form>
+
+    <div class="thanks hidden" id="thanks" aria-live="polite">
+      <div class="diyas" aria-hidden="true">🪔🎆🪔</div>
+      <h2 id="thanksTitle">Thank you!</h2>
+      <p id="thanksText"></p>
+      <div class="summary" id="summary"></div>
+      <button type="button" class="link-btn" id="editBtn">Edit my response</button>
+    </div>
+  </div>
+
+  <script>
+    /*
+     * HOW RESPONSES ARE COLLECTED
+     * ---------------------------
+     * This is a static page, so it needs a form backend to receive RSVPs.
+     * Easiest option: create a free form at https://formspree.io, then paste
+     * its endpoint below, e.g. "https://formspree.io/f/abcd1234".
+     * Responses will be emailed to you (and viewable/exportable as CSV).
+     *
+     * If left empty, the page runs in demo mode: it validates and shows the
+     * summary, but nothing is sent anywhere.
+     */
+    const FORM_ENDPOINT = "";
+
+    const form = document.getElementById("rsvp");
+    const attendingSection = document.getElementById("attendingSection");
+    const thanks = document.getElementById("thanks");
+
+    // Show guest + potluck sections only for Yes / Maybe
+    form.addEventListener("change", (e) => {
+      if (e.target.name === "attending") {
+        attendingSection.classList.toggle("hidden", e.target.value === "No");
+        setError("attending", "");
+      }
+    });
+
+    // Clear a field's error as soon as the guest edits it
+    form.addEventListener("input", (e) => {
+      const key = ["email", "phone"].includes(e.target.name) ? "contact" : e.target.name;
+      setError(key, "");
+    });
+
+    function setError(key, msg) {
+      const el = form.querySelector(`.error[data-for="${key}"]`);
+      if (el) el.textContent = msg;
+    }
+
+    function collect() {
+      const fd = new FormData(form);
+      const data = {};
+      for (const [k, v] of fd.entries()) {
+        data[k] = data[k] ? `${data[k]}, ${v}` : v;
+      }
+      if (data.attending === "No") {
+        // Drop potluck/guest fields if not attending
+        ["adults","kids","guestNames","category","dish","dietType","servings",
+         "allergens","needs","dietary","help","activities","song"].forEach(k => delete data[k]);
+      }
+      return data;
+    }
+
+    function validate(data) {
+      let ok = true;
+      ["name","contact","attending","category","dish"].forEach(k => setError(k, ""));
+
+      if (!data.name?.trim()) { setError("name", "Please enter your name."); ok = false; }
+      if (!data.email?.trim() && !data.phone?.trim()) {
+        setError("contact", "Please share an email or phone number so we can reach you."); ok = false;
+      } else if (data.email && !/^\S+@\S+\.\S+$/.test(data.email)) {
+        setError("contact", "That email doesn't look right."); ok = false;
+      }
+      if (!data.attending) { setError("attending", "Please let us know if you're coming."); ok = false; }
+      if (data.attending && data.attending !== "No") {
+        if (!data.category) { setError("category", "Please pick what you'd like to bring."); ok = false; }
+        else if (!data.category.startsWith("Not sure") && !data.category.startsWith("Plates") && !data.dish?.trim()) {
+          setError("dish", "Please tell us the dish name."); ok = false;
+        }
+      }
+      return ok;
+    }
+
+    const LABELS = {
+      name: "Name", email: "Email", phone: "Phone", attending: "Attending",
+      adults: "Adults", kids: "Kids", guestNames: "Coming with", category: "Bringing",
+      dish: "Dish", dietType: "Type", servings: "Servings", allergens: "Contains",
+      needs: "Needs", dietary: "Dietary notes", help: "Helping with",
+      activities: "Activities", song: "Song request", message: "Message"
+    };
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    }
+
+    function showThanks(data) {
+      const going = data.attending !== "No";
+      document.getElementById("thanksTitle").textContent =
+        going ? `See you soon, ${data.name.split(" ")[0]}! 🎉` : `We'll miss you, ${data.name.split(" ")[0]}!`;
+      document.getElementById("thanksText").textContent = going
+        ? "Your RSVP is in. Get ready for diyas, mithai and lots of fun!"
+        : "Thanks for letting us know. Wishing you a very Happy Diwali! 🪔";
+      document.getElementById("summary").innerHTML = Object.entries(data)
+        .filter(([, v]) => String(v).trim())
+        .map(([k, v]) => `<div><b>${LABELS[k] || k}:</b> ${escapeHtml(v)}</div>`)
+        .join("");
+      form.classList.add("hidden");
+      thanks.classList.remove("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const data = collect();
+      if (!validate(data)) {
+        form.querySelector(".error:not(:empty)")?.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
+
+      const btn = document.getElementById("submitBtn");
+      const submitError = document.getElementById("submitError");
+      submitError.textContent = "";
+
+      if (!FORM_ENDPOINT) { showThanks(data); return; } // demo mode
+
+      btn.disabled = true; btn.textContent = "Sending…";
+      try {
+        const res = await fetch(FORM_ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Accept": "application/json" },
+          body: JSON.stringify({ _subject: `Diwali RSVP: ${data.name} (${data.attending})`, ...data })
+        });
+        if (!res.ok) throw new Error(res.status);
+        showThanks(data);
+      } catch {
+        submitError.textContent = "Oops, something went wrong sending your RSVP. Please try again.";
+      } finally {
+        btn.disabled = false; btn.textContent = "Send RSVP ✨";
+      }
+    });
+
+    document.getElementById("editBtn").addEventListener("click", () => {
+      thanks.classList.add("hidden");
+      form.classList.remove("hidden");
+    });
+  </script>
+</body>
+</html>
