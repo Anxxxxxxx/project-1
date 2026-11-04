@@ -78,6 +78,13 @@
     .ticket .tag { font-size: .9rem; margin: 0 0 14px; }
     .ticket .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
     .ticket .facts div { font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; opacity: .75; }
+    .ticket .facts .wide { grid-column: 1 / -1; }
+    .ticket .map-link {
+      display: inline-block; margin-top: 6px; padding: 5px 12px; border-radius: 999px;
+      background: var(--ink); color: #fff; font-size: .78rem; letter-spacing: 0;
+      text-transform: none; text-decoration: none; font-weight: 600;
+    }
+    .map-inline { color: var(--gold); }
     .ticket .facts b { display: block; font-size: 1rem; letter-spacing: 0; text-transform: none; opacity: 1; color: var(--ink); }
     .ticket .stub .admit { font-family: "Playfair Display", serif; font-weight: 800; font-size: 1.3rem; line-height: 1; }
     .ticket .stub .diya { font-size: 2rem; }
@@ -268,7 +275,7 @@
         <div class="facts">
           <div>Date<b>Sat, 7 November</b></div>
           <div>Time<b>9:00 PM onwards</b></div>
-          <div>Where<b>🏠 723 Euclid, Apt 1</b></div>
+          <div class="wide">Where<b>🏠 723 Euclid Ave, Apt 1, Syracuse, NY 13210</b><a class="map-link" href="https://www.google.com/maps/search/?api=1&amp;query=723+Euclid+Ave+Apt+1,+Syracuse,+NY+13210" target="_blank" rel="noopener">📍 Open in Google Maps</a></div>
           <div>Dress code<b>Festive / ethnic</b></div>
           <div>On the menu<b>🌿 Veg potluck</b></div>
           <div>Fun<b>🃏 Cards &amp; party games</b></div>
@@ -307,7 +314,7 @@
     <header>
       <div class="diyas" aria-hidden="true">🪔✨🪔</div>
       <h1>Diwali Potluck Party</h1>
-      <p class="subtitle">Saturday, 7 November · 9:00 PM<br>📍 723 Euclid, Apt 1<br>Please RSVP by <b>Thursday, 5 November</b></p>
+      <p class="subtitle">Saturday, 7 November · 9:00 PM<br>📍 <a class="map-inline" href="https://www.google.com/maps/search/?api=1&amp;query=723+Euclid+Ave+Apt+1,+Syracuse,+NY+13210" target="_blank" rel="noopener">723 Euclid Ave, Apt 1, Syracuse, NY 13210</a><br>Please RSVP by <b>Thursday, 5 November</b></p>
       <button type="button" class="mini-invite" id="viewInviteBtn">🎟️ View invitation</button>
     </header>
 
@@ -474,6 +481,7 @@
             <div>Time<b>9:00 PM onwards</b></div>
             <div>Bringing<b id="passDish">—</b></div>
             <div>Status<b id="passStatus">Confirmed</b></div>
+            <div class="wide">Where<b>723 Euclid Ave, Apt 1, Syracuse, NY 13210</b><a class="map-link" href="https://www.google.com/maps/search/?api=1&amp;query=723+Euclid+Ave+Apt+1,+Syracuse,+NY+13210" target="_blank" rel="noopener">📍 Open in Google Maps</a></div>
           </div>
         </div>
         <div class="stub">
