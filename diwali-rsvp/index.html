@@ -158,6 +158,7 @@
     .thank-card h2 { font-family: "Playfair Display", serif; font-weight: 800; font-size: 2rem; margin: 6px 0 8px; color: var(--ink); }
     .thank-card p { margin: 0 0 12px; line-height: 1.5; }
     .tc-time { font-size: .8rem; opacity: .65; }
+    .ticket .hosts { margin: 14px 0 0; font-size: .85rem; }
     .tc-sign { font-family: "Playfair Display", serif; font-style: italic; }
     .thank-card button { margin-top: 6px; color: #fff; background: linear-gradient(90deg, #5a2d91, var(--ink)); }
 
@@ -267,11 +268,12 @@
         <div class="facts">
           <div>Date<b>Sat, 7 November</b></div>
           <div>Time<b>9:00 PM onwards</b></div>
-          <div>Where<b>Our place 🏠</b></div>
+          <div>Where<b>🏠 723 Euclid, Apt 1</b></div>
           <div>Dress code<b>Festive / ethnic</b></div>
           <div>On the menu<b>🌿 Veg potluck</b></div>
           <div>Fun<b>🃏 Cards &amp; party games</b></div>
         </div>
+        <p class="hosts">Hosted with love by <b>Anvita, Niyoshi &amp; Jiya</b></p>
       </div>
       <div class="stub">
         <div class="diya">🪔</div>
@@ -295,7 +297,7 @@
         <h2 id="tcName">Thank you!</h2>
         <p id="tcMsg"></p>
         <p class="tc-time" id="tcTime"></p>
-        <p class="tc-sign">With love &amp; light,<br><b>Anvita</b> ✨</p>
+        <p class="tc-sign">With love &amp; light,<br><b>Anvita, Niyoshi &amp; Jiya</b> ✨</p>
         <button type="button" id="tcClose">See my entry pass 🎟️</button>
       </div>
     </div>
@@ -305,7 +307,7 @@
     <header>
       <div class="diyas" aria-hidden="true">🪔✨🪔</div>
       <h1>Diwali Potluck Party</h1>
-      <p class="subtitle">Saturday, 7 November · 9:00 PM · Please RSVP by <b>Thursday, 5 November</b></p>
+      <p class="subtitle">Saturday, 7 November · 9:00 PM<br>📍 723 Euclid, Apt 1<br>Please RSVP by <b>Thursday, 5 November</b></p>
       <button type="button" class="mini-invite" id="viewInviteBtn">🎟️ View invitation</button>
     </header>
 
@@ -356,7 +358,7 @@
           </div>
           <div class="field">
             <label for="guestNames">Names of people coming with you</label>
-            <input type="text" id="guestNames" name="guestNames" placeholder="e.g. Priya, Arjun">
+            <input type="text" id="guestNames" name="guestNames">
           </div>
         </fieldset>
 
@@ -385,52 +387,18 @@
           </div>
           <div class="field">
             <label for="dish">Dish name</label>
-            <input type="text" id="dish" name="dish" placeholder="e.g. Paneer Tikka, Veg Biryani, Gulab Jamun">
+            <input type="text" id="dish" name="dish">
             <div class="hint">Helps us avoid five people bringing the same thing!</div>
             <div class="error" data-for="dish"></div>
           </div>
-          <div class="row">
-            <div class="field">
-              <label for="servings">Approx. servings</label>
-              <select id="servings" name="servings">
-                <option>5–10</option>
-                <option selected>10–15</option>
-                <option>15–20</option>
-                <option>20+</option>
-              </select>
-            </div>
-            <div class="field">
-              <span class="label">My dish is also…</span>
-              <div class="choices">
-                <label class="choice"><input type="checkbox" name="dishAlso" value="Vegan"><span>🌱 Vegan</span></label>
-                <label class="choice"><input type="checkbox" name="dishAlso" value="Jain-friendly"><span>🙏 Jain</span></label>
-              </div>
-            </div>
-          </div>
           <div class="field">
-            <span class="label">Does your dish contain any of these?</span>
-            <div class="choices">
-              <label class="choice"><input type="checkbox" name="allergens" value="Nuts"><span>🥜 Nuts</span></label>
-              <label class="choice"><input type="checkbox" name="allergens" value="Dairy"><span>🥛 Dairy</span></label>
-              <label class="choice"><input type="checkbox" name="allergens" value="Gluten"><span>🌾 Gluten</span></label>
-              <label class="choice"><input type="checkbox" name="allergens" value="Onion/Garlic"><span>🧅 Onion / Garlic</span></label>
-              <label class="choice"><input type="checkbox" name="allergens" value="Very spicy"><span>🌶️ Very spicy</span></label>
-            </div>
-          </div>
-          <div class="field">
-            <span class="label">Will your dish need anything?</span>
-            <div class="choices">
-              <label class="choice"><input type="checkbox" name="needs" value="Reheating"><span>🔥 Reheating</span></label>
-              <label class="choice"><input type="checkbox" name="needs" value="Fridge space"><span>❄️ Fridge space</span></label>
-              <label class="choice"><input type="checkbox" name="needs" value="Serving spoon"><span>🥄 Serving spoon</span></label>
-            </div>
-          </div>
-          <div class="field">
-            <label class="check">
-              <input type="checkbox" id="vegConfirm" name="vegConfirm" value="Confirmed 100% vegetarian">
-              <span>I confirm my dish is 100% vegetarian (no meat, fish or egg) <span class="req">*</span></span>
-            </label>
-            <div class="error" data-for="vegConfirm"></div>
+            <label for="servings">Approx. servings</label>
+            <select id="servings" name="servings">
+              <option>5–10</option>
+              <option selected>10–15</option>
+              <option>15–20</option>
+              <option>20+</option>
+            </select>
           </div>
         </fieldset>
 
@@ -462,10 +430,6 @@
         <fieldset>
           <legend>A Little More</legend>
           <div class="field">
-            <label for="dietary">Your own dietary restrictions or allergies</label>
-            <input type="text" id="dietary" name="dietary" placeholder="e.g. Jain, gluten-free, nut allergy">
-          </div>
-          <div class="field">
             <span class="label">Want to help out? (optional)</span>
             <div class="choices">
               <label class="choice"><input type="checkbox" name="help" value="Rangoli"><span>🎨 Rangoli</span></label>
@@ -477,7 +441,7 @@
           </div>
           <div class="field">
             <label for="song">Song request for the playlist 🎵</label>
-            <input type="text" id="song" name="song" placeholder="Your favourite Bollywood banger">
+            <input type="text" id="song" name="song">
           </div>
         </fieldset>
       </div>
@@ -620,7 +584,6 @@
         attendingSection.classList.toggle("hidden", e.target.value === "No");
         setError("attending", "");
       }
-      if (e.target.name === "vegConfirm") setError("vegConfirm", "");
     });
     form.addEventListener("input", (e) => {
       const key = ["email", "phone"].includes(e.target.name) ? "contact" : e.target.name;
@@ -639,15 +602,15 @@
         data[k] = data[k] ? `${data[k]}, ${v}` : v;
       }
       if (data.attending === "No") {
-        ["guests","guestNames","category","dish","servings","dishAlso","allergens",
-         "needs","vegConfirm","games","bringGame","dietary","help","song"].forEach(k => delete data[k]);
+        ["guests","guestNames","category","dish","servings",
+         "games","bringGame","help","song"].forEach(k => delete data[k]);
       }
       return data;
     }
 
     function validate(data) {
       let ok = true;
-      ["name","contact","attending","category","dish","vegConfirm"].forEach(k => setError(k, ""));
+      ["name","contact","attending","category","dish"].forEach(k => setError(k, ""));
 
       if (!data.name?.trim()) { setError("name", "Please enter your name."); ok = false; }
       if (!data.email?.trim() && !data.phone?.trim()) {
@@ -660,7 +623,6 @@
         const isFood = data.category && !data.category.startsWith("Not sure") && !data.category.startsWith("Plates");
         if (!data.category) { setError("category", "Please pick what you'd like to bring."); ok = false; }
         else if (isFood && !data.dish?.trim()) { setError("dish", "Please tell us the dish name."); ok = false; }
-        if (isFood && !data.vegConfirm) { setError("vegConfirm", "Please confirm your dish is vegetarian."); ok = false; }
       }
       return ok;
     }
@@ -668,9 +630,8 @@
     const LABELS = {
       name: "Name", email: "Email", phone: "Phone", attending: "Attending",
       guests: "Guests", guestNames: "Coming with", category: "Bringing",
-      dish: "Dish", servings: "Servings", dishAlso: "Dish is also", allergens: "Contains",
-      needs: "Needs", vegConfirm: "Vegetarian", games: "Excited for", bringGame: "Bringing along",
-      dietary: "Dietary notes", help: "Helping with", song: "Song request", message: "Message"
+      dish: "Dish", servings: "Servings", games: "Excited for", bringGame: "Bringing along",
+      help: "Helping with", song: "Song request", message: "Message"
     };
 
     function escapeHtml(s) {
